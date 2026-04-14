@@ -12,7 +12,7 @@ import {
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { GoogleSignin, statusCodes } from '@react-native-google-signin/google-signin';
-import { collection, addDoc, onSnapshot, orderBy, query } from 'firebase/firestore';
+import { collection, addDoc, onSnapshot, orderBy, query, where } from 'firebase/firestore';
 import { db } from '../../firebaseConfig';
 
 const USER_KEY = 'loggedInUser';
@@ -36,12 +36,17 @@ export default function Index() {
   }, []);
 
   useEffect(() => {
-    const q = query(collection(db, 'books'), orderBy('dateAdded', 'desc'));
+    if (!user) return;
+    const q = query(
+      collection(db, 'books'),
+      where('userId', '==', user.email),
+      orderBy('dateAdded', 'desc')
+    );
     const unsubscribe = onSnapshot(q, (snapshot) => {
       setMyBooks(snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() })));
     });
     return unsubscribe;
-  }, []);
+  }, [user]);
 
   useEffect(() => {
   AsyncStorage.getItem(USER_KEY).then((stored) => {
@@ -106,6 +111,8 @@ export default function Index() {
         title: bookTitle,
         author: bookAuthor,
         dateAdded: new Date().toISOString(),
+        userId: user.email,
+        userName: user.givenName ?? user.name ?? user.email,
       });
       Alert.alert("Success", `${bookTitle} has been added to your shelf!`);
       setIsAddingBook(false);
