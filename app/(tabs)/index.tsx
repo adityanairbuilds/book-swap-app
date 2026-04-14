@@ -12,7 +12,7 @@ import {
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { GoogleSignin, statusCodes } from '@react-native-google-signin/google-signin';
-import { collection, addDoc, onSnapshot, orderBy, query, where } from 'firebase/firestore';
+import { addDoc, collection, onSnapshot, orderBy, query, where } from 'firebase/firestore';
 import { db } from '../../firebaseConfig';
 
 const USER_KEY = 'loggedInUser';
@@ -106,6 +106,7 @@ export default function Index() {
       Alert.alert("Error", "Please fill in all fields");
       return;
     }
+    
     try {
       await addDoc(collection(db, 'books'), {
         title: bookTitle,
